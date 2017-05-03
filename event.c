@@ -82,15 +82,25 @@ print_event (gpointer data, G_GNUC_UNUSED gpointer user_data)
 void
 print_trace (void **array, int symbols)
 {
+	static GHashTable *ip_to_string = NULL;
+	gpointer ip;
 	char **names;
-	char *managed_frame;
+	char *frame_name;
 	int i;
 
-	names = backtrace_symbols (array, symbols);
+	if (ip_to_string == NULL)
+		ip_to_string = g_hash_table_new (NULL, NULL);
+
+	names = NULL;
 	for (i = 1; i < symbols; ++i) {
-		if ((managed_frame = mono_pmip (array [i])) != NULL)
-			g_print ("\t%d %s\n", i, managed_frame);
-		else
-			g_print ("\t%s\n", names [i]);
+		if (!g_hash_table_lookup_extended (ip_to_string, array [i], &ip, (gpointer*) &frame_name)) {
+			if (names == NULL)
+				names = backtrace_symbols (array, symbols);
+
+			if ((frame_name = mono_pmip (array [i])) == NULL)
+				frame_name = names [i];
+			g_hash_table_insert (ip_to_string, (gpointer) array [i], (gpointer) frame_name);
+		}
+		g_print ("\t%s\n", frame_name);
 	}
 }
