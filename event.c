@@ -70,11 +70,11 @@ print_event (gpointer data, G_GNUC_UNUSED gpointer user_data)
 	if (event->type == EVENT_CREATED)
 		g_print ("\tCreated %d -> %d\n", event->old_ref_count, event->new_ref_count);
 	else if (event->type == EVENT_REF)
-		g_print ("\tRef %d -> %d\n", event->old_ref_count, event->new_ref_count);
+		g_print ("\n\tRef %d -> %d\n", event->old_ref_count, event->new_ref_count);
 	else if (event->type == EVENT_UNREF)
-		g_print ("\tUnref %d -> %d\n", event->old_ref_count, event->new_ref_count);
+		g_print ("\n\tUnref %d -> %d\n", event->old_ref_count, event->new_ref_count);
 	else
-		g_print ("\tUnknown event...\n");
+		g_print ("\n\tUnknown event...\n");
 
 	print_trace (event->backtrace, event->symbols);
 }
