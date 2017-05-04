@@ -16,4 +16,6 @@ gpointer	g_object_new (GType type, const char *first, ...);
 gpointer	g_object_ref (gpointer object);
 void		g_object_unref (gpointer object);
 
+void gobject_tracker_init (void *libmono);
+
 #endif

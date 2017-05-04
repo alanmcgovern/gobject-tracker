@@ -160,6 +160,33 @@ static void g_object_finalized (G_GNUC_UNUSED gpointer data, GObject *obj)
 	G_UNLOCK (tracker_lock);
 }
 
+typedef void (* mono_dllmap_insert) (void *assembly, const char *dll, const char *func, const char *tdll, const char *tfunc);
+void gobject_tracker_init (void *libmono)
+{
+	if (!g_getenv ("DYLD_FORCE_FLAT_NAMESPACE")) {
+		g_print ("\n");
+		g_print ("You must export 'DYLD_FORCE_FLAT_NAMESPACE=1' to use the leak profiler.\n");
+		g_print ("If you are compiling Xamarin Studio from source use 'make run-leaks' to do this automatically.\n\n");
+		exit (1);
+	}
+
+	mono_dllmap_insert _mono_dllmap_insert = (mono_dllmap_insert) dlsym (libmono, "mono_dllmap_insert");
+	if (_mono_dllmap_insert == NULL) {
+		g_print ("Failed to locate the 'mono_dllmap_insert' symbol\n");
+		exit (1);
+	} else {
+		_mono_dllmap_insert (NULL, "libgobject-2.0.0.dylib", "g_object_new", "libgobject-tracker.dylib", "g_object_new");
+		_mono_dllmap_insert (NULL, "libgobject-2.0.0.dylib", "g_object_ref", "libgobject-tracker.dylib", "g_object_ref");
+		_mono_dllmap_insert (NULL, "libgobject-2.0.0.dylib", "g_object_unref", "libgobject-tracker.dylib", "g_object_unref");
+
+		_mono_dllmap_insert (NULL, "libgobject-2.0-0.dll", "g_object_new", "libgobject-tracker.dylib", "g_object_new");
+		_mono_dllmap_insert (NULL, "libgobject-2.0-0.dll", "g_object_ref", "libgobject-tracker.dylib", "g_object_ref");
+		_mono_dllmap_insert (NULL, "libgobject-2.0-0.dll", "g_object_unref", "libgobject-tracker.dylib", "g_object_unref");
+
+		g_print ("Successfully added dllmaps\n");
+	}
+}
+
 static gpointer find_symbol (const char *func_name)
 {
 	static void *libgobject_handle = NULL;
