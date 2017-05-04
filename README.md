@@ -2,10 +2,21 @@ Compilation:
 
 Just run `make` inside the main directory.
 
+Installation:
+
+Run `make install` to install the module into a side-by-side monodevelop
+checkout. If your monodevelop is somewhere else then set the correct path
+using the `MONODEVELOP_BIN_DIR` variable.
+
 Usage:
 
-Export these two environment variables and then launch Xamarin Studio:
+If you are compiling xamarin studio from source, just use
 
+	$ cd monodevelop && make run-leaks
+
+
+Alternatively, export these two environment variables and then launch Xamarin Studio.
+This method may be less accurate as it does not set up dllmaps in mono.
 	
 	DYLD_FORCE_FLAT_NAMESPACE=1
 	DYLD_INSERT_LIBRARIES=/full/path/to/gobject-tracker/libgobject-tracker.dylib
